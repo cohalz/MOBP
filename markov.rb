@@ -112,7 +112,7 @@ def gen_words(client,fetch_tweets,tweet,count=5)
 end
 
 def generate_tweet(client,count,fetch_tweets,tweet)
-  # 先頭を選択
+  # 先頭を選択(取得できなかったら繰り返す)
   results = gen_words(client,fetch_tweets,tweet)
   while results.size == 0 do
     results = gen_words(client,fetch_tweets,tweet)
@@ -130,10 +130,14 @@ def generate_tweet(client,count,fetch_tweets,tweet)
       markov_tweet += selected['second'] + selected['third'] + selected['fourth']
       break if selected['fourth'] == '' #  or
     end
+
     markov_tweet = normalize_tweet(markov_tweet)
-    if count < 3 and markov_tweet.size > 50 #heck_part(markov_tweet)
+
+    #文字数オーバーしたら数回再試行
+    if count < 3 and markov_tweet.size > 50
       markov_tweet = generate_tweet(client,count+1,fetch_tweets,tweet)
     end
+
     break
   end
   markov_tweet.gsub!(/　/,'')
