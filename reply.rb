@@ -2,7 +2,6 @@
 
 require 'twitter'
 require 'tweetstream'
-require 'csv'
 require 'natto'
 require 'date'
 require_relative 'markov'
@@ -55,19 +54,9 @@ class ReplyDaemon
     begin
       @stream.userstream do |object|
         if object.is_a?(Twitter::Tweet)
-                  # sleep(3)
           if object.text.include?('@' + BOT_SCREEN_NAME) && !(object.text.include?('RT'))
-          #if object.text.match(/.*@MOBP_.*/) && !(object.text.include?('RT'))
-           # if m = object.text.match(/^単語登録:(.*)\((.*)\)$/) 
-	     # open("~/dic/user.csv", 'a') { |f| 
-              #  f.puts("#{m[1]},,,10,名詞,固有名詞,人名,名,*,*,#{m[1]},*,*")} if m[2] == "人名"
-             #   f.puts("#{m[1]},,,10,名詞,固有名詞,一般,*,*,*,#{m[1]},*,*")} if m[2] == "一般"
-            #  }
-           # else
-
               reply = '@' + object.user.screen_name + ' ' + generate_tweet(@client,0,@fetch_tweets,object.text)
               @rest.update(reply[0, 140], { 'in_reply_to_status_id' => object.id })
-           # end
           end
           if object.user.screen_name != BOT_SCREEN_NAME && !(object.text.include?('RT'))
             create_markov_table(object.text,@client,@natto)
@@ -80,8 +69,6 @@ class ReplyDaemon
         f.puts(ex.backtrace) 
         f.puts(ex.message) 
         f.puts('') } if @error_log_path
-      # When something error occured, tell it by replying to admin
-      # @rest.update('@' + ADMIN_SCREEN_NAME + ' Error起こっためう')
     end
   end
 
