@@ -1,14 +1,9 @@
 # coding: utf-8
 
-# require 'igo-ruby'
 require 'natto'
 require 'nkf'
-require 'open-uri'
 require 'mysql2'
-require 'csv'
 require_relative 'config'
-BEGIN_FLG = '[BEGIN]'
-END_FLG = '[END]'
 
 #ランダム性と速度をここで調整
 LIMIT = ' and rand() < 0.05 limit 40'
@@ -23,7 +18,6 @@ def normalize_tweet(tweet1)
   tweet.gsub!(/https?:[\w\/\.]+/, '')  # URLを削除
   tweet.gsub!(/#/, ' #') #ハッシュタグ化
   tweet.gsub!(/[「」【】『』）]/, '') #括弧削除
-  tweet.gsub!(/&gt;/, '>') #実体参照
   tweet.gsub!(/"/, '') #インジェクションやばそう対策
   tweet.gsub!(/'/, '') #インジェクションやばそう対策
   tweet.gsub!(/’/, '') #インジェクションやばそう対策
