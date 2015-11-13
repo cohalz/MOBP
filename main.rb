@@ -5,16 +5,8 @@ require 'csv'
 require_relative 'markov'
 require_relative 'config'
 
-tweets_table = Array.new
-CSV.foreach(CSV_PATH, :headers => true) do |row|
-  tweet = normalize_tweet(row['text'])
-  next if !tweet
-  tweets_table << tweet
-end
-
-markov_table = create_markov_table(tweets_table)
-
-str = generate_tweet(markov_table, ARGV[0])
+client = Mysql2::Client.new(:host => 'localhost', :database => 'mobp' , :username => 'root', :password => PASSWD)
+str = generate_tweet(client,0,[],ARGV[0])
 if ARGV[0] == 'production'
   rest = Twitter::REST::Client.new do |config|
     config.consumer_key = YOUR_CONSUMER_KEY
@@ -24,4 +16,4 @@ if ARGV[0] == 'production'
   end
   rest.update(str)
 end
-puts "[tweet] #{str}"
+puts str
