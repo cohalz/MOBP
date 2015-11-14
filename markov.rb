@@ -64,15 +64,6 @@ def create_markov_table(tweet,client,natto)
   client.query(query)
 end
 
-def generate_first(markov_table)
-  selected_array = Array.new
-  markov_table.each do |markov_array|
-    if markov_array[0] == BEGIN_FLG
-      selected_array << markov_array
-    end
-  end
-  selected_array.sample
-end
 
 def gen_first(tweet)
   wakati = []
