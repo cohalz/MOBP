@@ -28,7 +28,7 @@ class ReplyDaemon
     @pid_file_path = './reply_daemon.pid'
     @error_log_path = './reply_error.log'
 
-    @client = Mysql2::Client.new(:host => 'localhost', :database => 'mobp' , :username => 'root', :password => DBPASSWD)
+    @client = Mysql2::Client.new(:host => 'localhost', :database => DB_NAME, :username => 'root', :password => DB_PASSWD)
     @natto = Natto::MeCab.new
    
     begin 

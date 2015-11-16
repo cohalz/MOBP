@@ -5,7 +5,7 @@ require 'csv'
 require_relative 'markov'
 require_relative 'config'
 
-client = Mysql2::Client.new(:host => 'localhost', :database => 'mobp' , :username => 'root', :password => DBPASSWD)
+client = Mysql2::Client.new(:host => 'localhost', :database => DB_NAME , :username => 'root', :password => DB_PASSWD)
 str = generate_tweet(client,0,[],ARGV[0])
 if ARGV[0] == 'production'
   rest = Twitter::REST::Client.new do |config|

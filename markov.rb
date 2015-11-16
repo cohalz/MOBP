@@ -53,13 +53,13 @@ def create_markov_table(tweet,client,natto)
   loop do
     wakati = wakati_array[i..(i+order-1)]
     break if wakati[order - 1] == nil
-    query = "insert into fourorder values ('#{wakati[0]}', '#{wakati[1]}', '#{wakati[2]}', '#{wakati[3]}')"
+    query = "insert into  #{MARKOV_TABLE} values ('#{wakati[0]}', '#{wakati[1]}', '#{wakati[2]}', '#{wakati[3]}')"
     query.gsub!(/\\\'/,"'")
     client.query(query)
     i += 1
   end
   nomtwi = normalize_tweet(tweet)
-  query = "insert into tweets values ('#{nomtwi}')"
+  query = "insert into #{MASTER_TABLE} values ('#{nomtwi}')"
   query.gsub!(/\\\'/,"'")
   client.query(query)
 end
@@ -83,14 +83,14 @@ end
 
 def gen_words(client,fetch_tweets,tweet,count=5)
   if count == 0 or tweet == nil
-    query = "select * from fourorder where rand() < 0.001 limit 1"
+    query = "select * from #{MARKOV_TABLE} where rand() < 0.001 limit 1"
     results = client.query(query)
   else
     if tweet == ''
-      query = "select * from fourorder where first = '#{gen_first(fetch_tweets.sample)}'"
+      query = "select * from #{MARKOV_TABLE} where #{FIRST_COLUMN} = '#{gen_first(fetch_tweets.sample)}'"
       results = client.query(query)
     else
-      query = "select * from fourorder where first = '#{gen_first(tweet)}'"
+      query = "select * from #{MARKOV_TABLE} where #{FIRST_COLUMN} = '#{gen_first(tweet)}'"
       results = client.query(query)
       if results.count == 0
         gen_words(client,fetch_tweets,tweet,count-1)
@@ -109,17 +109,20 @@ def generate_tweet(client,count,fetch_tweets,tweet)
     results = gen_words(client,fetch_tweets,tweet)
   end
   selected = results.to_a.sample
-  markov_tweet = selected['first'] + selected['second'] + selected['third'] + selected['fourth']
+  markov_tweet = selected[FIRST_COLUMN] + selected[SECOND_COLUMN] +
+                 selected[THIRD_COLUMN] + selected[FOURTH_COLUMN]
 
   while true
     # 以後、''で終わるものを拾うまで連鎖を続ける
     loop do
-      query = "select * from fourorder where first = '#{selected['fourth']}'" + LIMIT
+      query = "select * from #{MARKOV_TABLE} where
+                #{FIRST_COLUMN} = '#{selected[FOURTH_COLUMN]}'" + LIMIT
       results = client.query(query)
       break if results.count == 0 # 連鎖できなければ諦める
       selected = results.to_a.sample
-      markov_tweet += selected['second'] + selected['third'] + selected['fourth']
-      break if selected['fourth'] == '' #  or
+      markov_tweet += selected[SECOND_COLUMN] + selected[THIRD_COLUMN] +
+                      selected[FOURTH_COLUMN]
+      break if selected[FOURTH_COLUMN] == '' #  or
     end
 
     markov_tweet = normalize_tweet(markov_tweet)
