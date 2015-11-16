@@ -10,7 +10,8 @@ YOUR_CONSUMER_SECRET = settings.elements['root/twitter/mobp/consumerSecret'].tex
 YOUR_OAUTH_TOKEN = settings.elements['root/twitter/mobp/accessToken'].text
 YOUR_OAUTH_TOKEN_SECRET = settings.elements['root/twitter/mobp/accessTokenSecret'].text
 
-DB_PASSWD = settings.elements['root/db/mysql/localpass'].text
+#DB_PASSWD = settings.elements['root/db/mysql/localpass'].text
+DB_PASSWD = settings.elements['root/db/mysql/pass'].text
 DB_NAME = settings.elements['root/db/mysql/mobp/dbname'].text
 
 MASTER_TABLE = settings.elements['root/db/mysql/mobp/master/tablename'].text
