@@ -87,10 +87,18 @@ def gen_words(client,fetch_tweets,tweet,count=5)
     results = client.query(query)
   else
     if tweet == ''
-      query = "select * from #{MARKOV_TABLE} where #{FIRST_COLUMN} = '#{gen_first(fetch_tweets.sample)}'"
+      if rand(3) < 2
+        query = "select * from #{MARKOV_TABLE} where #{FIRST_COLUMN} = '#{gen_first(fetch_tweets.sample)}'"
+      else
+        query = "select * from #{MARKOV_TABLE} where #{SECOND_COLUMN} = '#{gen_first(fetch_tweets.sample)}'"
+        end
       results = client.query(query)
     else
-      query = "select * from #{MARKOV_TABLE} where #{FIRST_COLUMN} = '#{gen_first(tweet)}'"
+      if rand(3) < 2
+        query = "select * from #{MARKOV_TABLE} where #{FIRST_COLUMN} = '#{gen_first(tweet)}'"
+      else
+        query = "select * from #{MARKOV_TABLE} where #{SECOND_COLUMN} = '#{gen_first(tweet)}'"
+      end
       results = client.query(query)
       if results.count == 0
         gen_words(client,fetch_tweets,tweet,count-1)
