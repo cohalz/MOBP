@@ -5,7 +5,7 @@ require 'mysql2'
 require_relative 'config'
 
 #ランダム性と速度をここで調整
-LIMIT = ' and rand() < 0.05 limit 40'
+LIMIT = ' and rand() < 0.05 limit 60'
 
 def normalize_tweet(tweet1)
   return "" if tweet1 == nil
