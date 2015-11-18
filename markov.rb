@@ -123,11 +123,7 @@ def gen_words(client,fetch_tweets,tweet,natto,count=5)
 end
 
 def generate_tweet(client,count,fetch_tweets,tweet,natto)
-  # 先頭を選択(取得できなかったら繰り返す)
-  loop do
-    results = gen_words(client,fetch_tweets,tweet,natto)
-    break if results.size != 0
-  end
+  results = gen_words(client,fetch_tweets,tweet,natto)
 
   selected = results.to_a.sample
 
