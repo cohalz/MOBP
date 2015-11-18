@@ -6,7 +6,9 @@ require_relative 'markov'
 require_relative 'config'
 
 client = Mysql2::Client.new(:host => 'localhost', :database => DB_NAME , :username => 'root', :password => DB_PASSWD)
-str = generate_tweet(client,0,[],ARGV[0])
+natto = Natto::MeCab.new
+
+str = generate_tweet(client,0,[],ARGV[0],natto)
 if ARGV[0] == 'production'
   rest = Twitter::REST::Client.new do |config|
     config.consumer_key = YOUR_CONSUMER_KEY

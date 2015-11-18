@@ -35,7 +35,7 @@ class ReplyDaemon
       @fetch_tweets = @rest.home_timeline.map {|object| 
         normalize_tweet(object.text)
       }
-      twi = generate_tweet(@client,0,@fetch_tweets,'')
+      twi = generate_tweet(@client,0,@fetch_tweets,'',@natto)
       `cat ./reply_daemon.pid | xargs kill`
       if ARGV[0] == '-notweet'
         puts(twi)
@@ -59,7 +59,7 @@ class ReplyDaemon
       @stream.userstream do |object|
         if object.is_a?(Twitter::Tweet)
           if object.text.include?('@' + BOT_SCREEN_NAME) && !(object.text.include?('RT'))
-              reply = '@' + object.user.screen_name + ' ' + generate_tweet(@client,0,@fetch_tweets,object.text)
+              reply = '@' + object.user.screen_name + ' ' + generate_tweet(@client,0,@fetch_tweets,object.text,@natto)
               @rest.update(reply[0, 140], { 'in_reply_to_status_id' => object.id })
           end
           if object.user.screen_name != BOT_SCREEN_NAME && !(object.text.include?('RT'))
