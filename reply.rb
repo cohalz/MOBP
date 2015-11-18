@@ -37,7 +37,11 @@ class ReplyDaemon
       }
       twi = generate_tweet(@client,0,@fetch_tweets,'')
       `cat ./reply_daemon.pid | xargs kill`
-      @rest.update(twi)
+      if ARGV[0] == '-notweet'
+        puts(twi)
+      else
+        @rest.update(twi)
+      end
       puts 'Finish initialization.'
 
     rescue => ex
