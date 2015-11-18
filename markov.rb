@@ -97,7 +97,7 @@ end
 
 def gen_words(client,fetch_tweets,tweet,natto,count=5)
   if count == 0 or tweet == nil
-    query = "select * from #{MARKOV_TABLE} where rand() < 0.001 limit 1"
+    query = "select * from #{MARKOV_TABLE} where rand() < 0.01 limit 10"
     results = client.query(query)
   else
     if tweet == ''
