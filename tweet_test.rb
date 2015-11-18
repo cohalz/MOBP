@@ -1,7 +1,7 @@
 # coding: utf-8
 Encoding.default_external = "UTF-8"
 require 'twitter'
-require 'csv'
+require 'natto'
 require_relative 'markov'
 require_relative 'config'
 
