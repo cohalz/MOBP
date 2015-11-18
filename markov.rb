@@ -41,6 +41,21 @@ def wakatu(tweet,natto)
   tmp
 end
 
+def first_is_particle?(tweet)
+  particle = '助詞'
+  natto = Natto::MeCab.new
+  nomtwi = normalize_tweet(tweet)
+
+  if nomtwi != nil
+    natto.parse(nomtwi) do |n|
+      hinshi = n.feature.split(',')
+      return hinshi[0] == particle
+    end
+  end
+  false
+end
+
+
 
 def create_markov_table(tweet,client,natto)
   # 形態素4つずつから成るテーブルを生成
@@ -81,6 +96,8 @@ def gen_first(tweet)
   wakati.sample
 end
 
+
+
 def gen_words(client,fetch_tweets,tweet,count=5)
   if count == 0 or tweet == nil
     query = "select * from #{MARKOV_TABLE} where rand() < 0.001 limit 1"
@@ -89,17 +106,24 @@ def gen_words(client,fetch_tweets,tweet,count=5)
     if tweet == ''
       if rand(3) < 2
         query = "select * from #{MARKOV_TABLE} where #{FIRST_COLUMN} = '#{gen_first(fetch_tweets.sample)}'"
+        results = client.query(query)
       else
         query = "select * from #{MARKOV_TABLE} where #{SECOND_COLUMN} = '#{gen_first(fetch_tweets.sample)}'"
-        end
-      results = client.query(query)
+        results = client.query(query).select { |result|
+          !first_is_particle?(result[FIRST_COLUMN]+result[SECOND_COLUMN]+result[THIRD_COLUMN]+result[FOURTH_COLUMN])
+        }
+      end
+    results
     else
       if rand(3) < 2
         query = "select * from #{MARKOV_TABLE} where #{FIRST_COLUMN} = '#{gen_first(tweet)}'"
+        results = client.query(query)
       else
         query = "select * from #{MARKOV_TABLE} where #{SECOND_COLUMN} = '#{gen_first(tweet)}'"
+        results = client.query(query).select { |result|
+          !first_is_particle?(result[FIRST_COLUMN]+result[SECOND_COLUMN]+result[THIRD_COLUMN]+result[FOURTH_COLUMN])
+        }
       end
-      results = client.query(query)
       if results.count == 0
         gen_words(client,fetch_tweets,tweet,count-1)
       else
