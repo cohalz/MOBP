@@ -104,26 +104,17 @@ def gen_words(client,fetch_tweets,tweet,count=5)
     results = client.query(query)
   else
     if tweet == ''
-      if rand(3) < 2
-        query = "select * from #{MARKOV_TABLE} where #{FIRST_COLUMN} = '#{gen_first(fetch_tweets.sample)}'"
-        results = client.query(query)
-      else
-        query = "select * from #{MARKOV_TABLE} where #{SECOND_COLUMN} = '#{gen_first(fetch_tweets.sample)}'"
-        results = client.query(query).select { |result|
-          !first_is_particle?(result[FIRST_COLUMN]+result[SECOND_COLUMN]+result[THIRD_COLUMN]+result[FOURTH_COLUMN])
-        }
-      end
-    results
+      query = "select * from #{MARKOV_TABLE} where #{FIRST_COLUMN} = '#{gen_first(fetch_tweets.sample)}' or
+                                                     #{SECOND_COLUMN} = '#{gen_first(fetch_tweets.sample)}'"
+      results = client.query(query).select { |result|
+        !first_is_particle?(result[FIRST_COLUMN]+result[SECOND_COLUMN]+result[THIRD_COLUMN]+result[FOURTH_COLUMN])
+      }
     else
-      if rand(3) < 2
-        query = "select * from #{MARKOV_TABLE} where #{FIRST_COLUMN} = '#{gen_first(tweet)}'"
-        results = client.query(query)
-      else
-        query = "select * from #{MARKOV_TABLE} where #{SECOND_COLUMN} = '#{gen_first(tweet)}'"
-        results = client.query(query).select { |result|
-          !first_is_particle?(result[FIRST_COLUMN]+result[SECOND_COLUMN]+result[THIRD_COLUMN]+result[FOURTH_COLUMN])
-        }
-      end
+      query = "select * from #{MARKOV_TABLE} where #{FIRST_COLUMN} = '#{gen_first(tweet)}' or
+                                                   #{SECOND_COLUMN} = '#{gen_first(tweet)}'"
+      results = client.query(query).select { |result|
+        !first_is_particle?(result[FIRST_COLUMN]+result[SECOND_COLUMN]+result[THIRD_COLUMN]+result[FOURTH_COLUMN])
+      }
       if results.count == 0
         gen_words(client,fetch_tweets,tweet,count-1)
       else
