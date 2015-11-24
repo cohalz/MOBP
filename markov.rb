@@ -40,14 +40,15 @@ def wakatu(tweet,natto)
   tmp
 end
 
-def first_is_particle?(tweet,natto)
-  particle = '助詞'
+def first_is_noun?(tweet,natto)
+  whitelist = ['名詞', '感動詞','記号']
+  blacklist = ['接尾', '代名詞', '形容動詞語幹']
   nomtwi = normalize_tweet(tweet)
 
   if nomtwi != nil
     natto.parse(nomtwi) do |n|
       hinshi = n.feature.split(',')
-      return hinshi[0] == particle
+      return true if whitelist.include?(hinshi[0]) && !blacklist.include?(hinshi[1])
     end
   end
   false
@@ -80,7 +81,7 @@ end
 
 def gen_first(tweet,natto)
   wakati = []
-  whitelist = ['名詞', '感動詞']
+  whitelist = ['名詞', '感動詞','記号']
   blacklist = ['接尾', '代名詞', '形容動詞語幹']
   nomtwi = normalize_tweet(tweet)
 
@@ -104,13 +105,13 @@ def gen_words(client,fetch_tweets,tweet,natto,count=5)
       query = "select * from #{MARKOV_TABLE} where #{FIRST_COLUMN} = '#{gen_first(fetch_tweets.sample,natto)}' or
                                                      #{SECOND_COLUMN} = '#{gen_first(fetch_tweets.sample,natto)}'"
       results = client.query(query).select { |result|
-        !first_is_particle?(result[FIRST_COLUMN]+result[SECOND_COLUMN]+result[THIRD_COLUMN]+result[FOURTH_COLUMN],natto)
+        !first_is_noun?(result[FIRST_COLUMN]+result[SECOND_COLUMN]+result[THIRD_COLUMN]+result[FOURTH_COLUMN],natto)
       }
     else
       query = "select * from #{MARKOV_TABLE} where #{FIRST_COLUMN} = '#{gen_first(tweet,natto)}' or
                                                    #{SECOND_COLUMN} = '#{gen_first(tweet,natto)}'"
       results = client.query(query).select { |result|
-        !first_is_particle?(result[FIRST_COLUMN]+result[SECOND_COLUMN]+result[THIRD_COLUMN]+result[FOURTH_COLUMN],natto)
+        !first_is_noun?(result[FIRST_COLUMN]+result[SECOND_COLUMN]+result[THIRD_COLUMN]+result[FOURTH_COLUMN],natto)
       }
       if results.count == 0
         gen_words(client,fetch_tweets,tweet,natto,count-1)
