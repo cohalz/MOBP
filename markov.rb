@@ -105,13 +105,13 @@ def gen_words(client,fetch_tweets,tweet,natto,count=5)
       query = "select * from #{MARKOV_TABLE} where #{FIRST_COLUMN} = '#{gen_first(fetch_tweets.sample,natto)}' or
                                                      #{SECOND_COLUMN} = '#{gen_first(fetch_tweets.sample,natto)}'"
       results = client.query(query).select { |result|
-        !first_is_noun?(result[FIRST_COLUMN]+result[SECOND_COLUMN]+result[THIRD_COLUMN]+result[FOURTH_COLUMN],natto)
+        first_is_noun?(result[FIRST_COLUMN]+result[SECOND_COLUMN]+result[THIRD_COLUMN]+result[FOURTH_COLUMN],natto)
       }
     else
       query = "select * from #{MARKOV_TABLE} where #{FIRST_COLUMN} = '#{gen_first(tweet,natto)}' or
                                                    #{SECOND_COLUMN} = '#{gen_first(tweet,natto)}'"
       results = client.query(query).select { |result|
-        !first_is_noun?(result[FIRST_COLUMN]+result[SECOND_COLUMN]+result[THIRD_COLUMN]+result[FOURTH_COLUMN],natto)
+        first_is_noun?(result[FIRST_COLUMN]+result[SECOND_COLUMN]+result[THIRD_COLUMN]+result[FOURTH_COLUMN],natto)
       }
       if results.count == 0
         gen_words(client,fetch_tweets,tweet,natto,count-1)
