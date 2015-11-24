@@ -42,7 +42,7 @@ end
 
 def first_is_noun?(tweet,natto)
   whitelist = ['名詞', '感動詞','記号']
-  blacklist = ['接尾', '代名詞', '形容動詞語幹']
+  blacklist = ['接尾', '代名詞', '形容動詞語幹','句点','読点']
   nomtwi = normalize_tweet(tweet)
 
   if nomtwi != nil
@@ -53,8 +53,6 @@ def first_is_noun?(tweet,natto)
   end
   false
 end
-
-
 
 def create_markov_table(tweet,client,natto)
   # 形態素4つずつから成るテーブルを生成
@@ -78,11 +76,10 @@ def create_markov_table(tweet,client,natto)
   client.query(query)
 end
 
-
 def gen_first(tweet,natto)
   wakati = []
   whitelist = ['名詞', '感動詞','記号']
-  blacklist = ['接尾', '代名詞', '形容動詞語幹']
+  blacklist = ['接尾', '代名詞', '形容動詞語幹','句点','読点']
   nomtwi = normalize_tweet(tweet)
 
   if nomtwi != nil
@@ -94,39 +91,32 @@ def gen_first(tweet,natto)
   wakati.sample
 end
 
-
-
-def gen_words(client,fetch_tweets,tweet,natto,count=5)
-  if count == 0 or tweet == nil
+def gen_words(client,word,count=5)
+  if count == 0 or word == nil
     query = "select * from #{MARKOV_TABLE} where rand() < 0.01 limit 10"
-    results = client.query(query)
+    return client.query(query)
   else
-    if tweet == ''
-      query = "select * from #{MARKOV_TABLE} where #{FIRST_COLUMN} = '#{gen_first(fetch_tweets.sample,natto)}' or
-                                                     #{SECOND_COLUMN} = '#{gen_first(fetch_tweets.sample,natto)}'"
-      results = client.query(query).select { |result|
-        first_is_noun?(result[FIRST_COLUMN]+result[SECOND_COLUMN]+result[THIRD_COLUMN]+result[FOURTH_COLUMN],natto)
-      }
+    query = "select * from #{MARKOV_TABLE} where #{FIRST_COLUMN} = '#{word}' or
+                                                 #{SECOND_COLUMN} = '#{word}'"
+    results = client.query(query)
+    if results.count == 0
+      return gen_words(client,word,count-1)
     else
-      query = "select * from #{MARKOV_TABLE} where #{FIRST_COLUMN} = '#{gen_first(tweet,natto)}' or
-                                                   #{SECOND_COLUMN} = '#{gen_first(tweet,natto)}'"
-      results = client.query(query).select { |result|
-        first_is_noun?(result[FIRST_COLUMN]+result[SECOND_COLUMN]+result[THIRD_COLUMN]+result[FOURTH_COLUMN],natto)
-      }
-      if results.count == 0
-        gen_words(client,fetch_tweets,tweet,natto,count-1)
-      else
-        results
-      end
+      return results
     end
   end
-  results
 end
 
 def generate_tweet(client,count,fetch_tweets,tweet,natto)
-  results = gen_words(client,fetch_tweets,tweet,natto)
+  if tweet == ''
+    results = gen_words(client,gen_first(fetch_tweets.sample,natto))
+  else
+    results = gen_words(client,gen_first(tweet,natto))
+  end
 
-  selected = results.to_a.sample
+  selected = results.select { |result|
+    first_is_noun?(result[FIRST_COLUMN]+result[SECOND_COLUMN]+result[THIRD_COLUMN]+result[FOURTH_COLUMN],natto)
+  }.to_a.sample
 
   markov_tweet = selected[FIRST_COLUMN] + selected[SECOND_COLUMN] +
                  selected[THIRD_COLUMN] + selected[FOURTH_COLUMN]
