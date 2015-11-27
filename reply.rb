@@ -31,10 +31,13 @@ class ReplyDaemon
     @client = Mysql2::Client.new(:host => 'localhost', :database => DB_NAME, :username => 'root', :password => DB_PASSWD)
     @natto = Natto::MeCab.new
    
-    begin 
-      @fetch_tweets = @rest.home_timeline.map {|object| 
+    begin
+      puts 'Fetching tweets...'
+      @fetch_tweets = @rest.home_timeline.map {|object|
         normalize_tweet(object.text)
       }
+
+      puts 'Generating Tweet...'
       twi = generate_tweet(@client,0,@fetch_tweets,'',@natto)
       `cat ./reply_daemon.pid | xargs kill`
       if ARGV[0] == '-notweet'
