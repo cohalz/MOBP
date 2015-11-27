@@ -48,10 +48,9 @@ def first_is_noun?(tweet,natto)
   if nomtwi != nil
     natto.parse(nomtwi) do |n|
       hinshi = n.feature.split(',')
-      return true if whitelist.include?(hinshi[0]) && !blacklist.include?(hinshi[1])
+      return whitelist.include?(hinshi[0]) && !blacklist.include?(hinshi[1])
     end
   end
-  false
 end
 
 def create_markov_table(tweet,client,natto)
@@ -114,9 +113,9 @@ def generate_tweet(client,count,fetch_tweets,tweet,natto)
     results = gen_words(client,gen_first(tweet,natto))
   end
 
-  selected = results.select { |result|
+  selected = results.to_a.select { |result|
     first_is_noun?(result[FIRST_COLUMN]+result[SECOND_COLUMN]+result[THIRD_COLUMN]+result[FOURTH_COLUMN],natto)
-  }.to_a.sample
+  }.sample
 
   markov_tweet = selected[FIRST_COLUMN] + selected[SECOND_COLUMN] +
                  selected[THIRD_COLUMN] + selected[FOURTH_COLUMN]
