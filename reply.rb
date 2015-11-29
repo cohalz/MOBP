@@ -28,17 +28,20 @@ class ReplyDaemon
     @pid_file_path = './reply_daemon.pid'
     @error_log_path = './reply_error.log'
 
-    @client = Mysql2::Client.new(:host => 'localhost', :database => DB_NAME, :username => 'root', :password => DB_PASSWD)
-    @natto = Natto::MeCab.new
-   
+    client = Mysql2::Client.new(:host => 'localhost', :database => DB_NAME, :username => 'root', :password => DB_PASSWD)
+    natto = Natto::MeCab.new
+
+
     begin
       puts 'Fetching tweets...'
-      @fetch_tweets = @rest.home_timeline.map {|object|
-        normalize_tweet(object.text)
+      fetch_tweets = @rest.home_timeline.map {|object|
+        object.text
       }
 
+      @markov = Markov.new(natto,fetch_tweets,client)
+
       puts 'Generating Tweet...'
-      twi = generate_tweet(@client,0,@fetch_tweets,'',@natto)
+      twi = @markov.generate_sentence('')
       `cat ./reply_daemon.pid | xargs kill`
       if ARGV[0] == '-notweet'
         puts(twi)
@@ -62,11 +65,11 @@ class ReplyDaemon
       @stream.userstream do |object|
         if object.is_a?(Twitter::Tweet)
           if object.text.include?('@' + BOT_SCREEN_NAME) && !(object.text.include?('RT'))
-              reply = '@' + object.user.screen_name + ' ' + generate_tweet(@client,0,@fetch_tweets,object.text,@natto)
+              reply = '@' + object.user.screen_name + ' ' + @markov.generate_sentence(object.text)
               @rest.update(reply[0, 140], { 'in_reply_to_status_id' => object.id })
           end
           if object.user.screen_name != BOT_SCREEN_NAME && !(object.text.include?('RT'))
-            create_markov_table(object.text,@client,@natto)
+            @markov.create_markov_table(object.text)
           end
         end
       end
