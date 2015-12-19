@@ -19,7 +19,7 @@ fetch_tweets = rest.home_timeline.map {|object|
 markov = Markov.new(natto,fetch_tweets,client)
 
 str = markov.generate_sentence(ARGV[0])
-if ARGV[0] == 'production'
+if ARGV[1] == 'production'
   rest.update(str)
 end
 puts str
